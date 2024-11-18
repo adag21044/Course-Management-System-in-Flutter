@@ -16,6 +16,7 @@ class _SecretaryPageState extends State<SecretaryPage> {
     _fetchCourses();
   }
 
+  // Fetch all courses from the database
   void _fetchCourses() async {
     final courses = await _dbHelper.getCourses();
     setState(() {
@@ -23,52 +24,106 @@ class _SecretaryPageState extends State<SecretaryPage> {
     });
   }
 
-  void _addCourse() async {
-    await _dbHelper.addCourse('OOP', 'BİL 201', '2. Sınıf');
-    _fetchCourses();
+  // Show dialog to add a new course
+  Future<void> _showAddCourseDialog() async {
+    final TextEditingController _nameController = TextEditingController();
+    final TextEditingController _codeController = TextEditingController();
+    final TextEditingController _classController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add Course'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Course Name'),
+              ),
+              TextField(
+                controller: _codeController,
+                decoration: InputDecoration(labelText: 'Course Code'),
+              ),
+              TextField(
+                controller: _classController,
+                decoration: InputDecoration(labelText: 'Class'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (_nameController.text.isNotEmpty &&
+                    _codeController.text.isNotEmpty &&
+                    _classController.text.isNotEmpty) {
+                  try {
+                    await _dbHelper.addCourse(
+                      _nameController.text.trim(),
+                      _codeController.text.trim(),
+                      _classController.text.trim(),
+                    );
+                    Navigator.pop(context); // Dialog'u kapat
+                    _fetchCourses(); // Listeyi yenile
+                  } catch (e) {
+                    print("Error adding course: $e");
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('All fields are required')),
+                  );
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
+  // Delete a course by ID
   void _deleteCourse(int id) async {
-    await _dbHelper.deleteCourse(id);
-    _fetchCourses();
-  }
-
-  void _updateCourse(int id) async {
-    await _dbHelper.updateCourse(id, 'Güncel OOP', 'BİL 202');
-    _fetchCourses();
+    try {
+      await _dbHelper.deleteCourse(id);
+      _fetchCourses(); // Refresh the courses list after deletion
+    } catch (e) {
+      print('Error deleting course: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sekreter Paneli')),
-      body: ListView.builder(
-        itemCount: _courses.length,
-        itemBuilder: (context, index) {
-          final course = _courses[index];
-          return ListTile(
-            title: Text(course['dersAd']),
-            subtitle: Text('${course['DersKod']} - ${course['Sınıf']}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () => _updateCourse(course['id']),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => _deleteCourse(course['id']),
-                ),
-              ],
+      appBar: AppBar(title: Text('Secretary Panel')),
+      body: _courses.isEmpty
+          ? Center(child: Text('No courses available'))
+          : ListView.builder(
+              itemCount: _courses.length,
+              itemBuilder: (context, index) {
+                final course = _courses[index];
+                return ListTile(
+                  title: Text(course['courseName']),
+                  subtitle: Text('${course['courseCode']} - Class: ${course['courseClass']}'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () => _deleteCourse(course['id']),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addCourse,
+        onPressed: _showAddCourseDialog,
         child: Icon(Icons.add),
       ),
     );
   }
 }
+
+        

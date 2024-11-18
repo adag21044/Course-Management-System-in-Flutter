@@ -11,6 +11,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
+  // Handle login process
   void _login() async {
     final username = _usernameController.text;
     final password = _passwordController.text;
@@ -20,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushNamed(context, '/secretaryPage');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hatalı kullanıcı adı veya şifre')),
+        SnackBar(content: Text('Invalid username or password')),
       );
     }
   }
@@ -28,24 +29,24 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Giriş Yap')),
+      appBar: AppBar(title: Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Kullanıcı Adı'),
+              decoration: InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Şifre'),
+              decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Giriş Yap'),
+              child: Text('Login'),
             ),
           ],
         ),

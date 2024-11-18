@@ -7,7 +7,7 @@ class DatabaseViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Veritabanı Görüntüleyici')),
+      appBar: AppBar(title: Text('Database Viewer')),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _dbHelper.getCourses(),
         builder: (context, snapshot) {
@@ -18,8 +18,8 @@ class DatabaseViewer extends StatelessWidget {
             itemBuilder: (context, index) {
               final course = courses[index];
               return ListTile(
-                title: Text(course['dersAd']),
-                subtitle: Text('${course['DersKod']} - ${course['Sınıf']}'),
+                title: Text(course['courseName']),
+                subtitle: Text('${course['courseCode']} - ${course['courseClass']}'),
               );
             },
           );
